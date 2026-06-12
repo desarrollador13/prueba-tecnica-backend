@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  payment-postgres-db:
+    image: postgres:15-alpine
+    container_name: payment_postgres_db
+    environment:
+      POSTGRES_USER: payment
+      POSTGRES_PASSWORD: payment
+      POSTGRES_DB: payment_db
+      TZ: "America/Bogota" 
+    ports:
+      - "5432:5432"
+    volumes:
+      - payment_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payment -d payment_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  payment_db_data:

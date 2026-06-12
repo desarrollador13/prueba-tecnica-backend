@@ -17,6 +17,11 @@ export const HTTP_ERRORS = {
     STATUS: 502,
     ERROR_TEXT: 'Bad Gateway',
     MESSAGE: 'An error occurred while communicating with the internal payment service.'
+  },
+  RATE_LIMIT: {
+    STATUS: 429,
+    ERROR_TEXT: 'Too Many Requests',
+    MESSAGE_TEMPLATE: 'Rate limit exceeded. Maximum'
   }
 };
 
