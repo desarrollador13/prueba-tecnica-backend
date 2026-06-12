@@ -1,8 +1,16 @@
-node_modules/
-.env
 *.log
 .DS_Store
 
 # Documentos internos del evaluador - NO compartir con candidatos
 evaluacion/
 recursos/
+
+.vscode/
+
+**/node_modules/
+**/dist/
+**/.tscache/
+**/.nest/
+
+**/.env
+**/.env.*
