@@ -27,6 +27,7 @@ export class TransactionsController {
     @Post()
     @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
     async create(@Body() createTransactionDto: CreateTransactionDto, @CurrentMerchant() merchant: Merchant) {
+        console.log(merchant.id + " merchant id");
         return await this.transactionsService.create(createTransactionDto, merchant.id);
     }
 

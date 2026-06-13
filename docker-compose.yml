@@ -5,8 +5,8 @@ services:
     image: postgres:15-alpine
     container_name: payment_postgres_db
     environment:
-      POSTGRES_USER: payment
-      POSTGRES_PASSWORD: payment
+      POSTGRES_USER: ${POSTGRES_USER:-payment}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-payment}
       POSTGRES_DB: payment_db
       TZ: "America/Bogota" 
     ports:
@@ -18,6 +18,37 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  
+  payment-service:
+    build:
+      context: ./payment-service
+    container_name: payment-service
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: "postgresql://payment:payment@payment-postgres-db:5432/payment_db"
+    depends_on:
+      payment-postgres-db:
+        condition: service_healthy
+
+  api-gateway:
+    build: 
+      context: ./api-gateway
+    container_name: api-gateway
+    ports: 
+      - "3000:3000"
+    environment:
+      PAYMENT_SERVICE_URL: "http://payment-service:3001"
+      PORT: ${PORT:-3000}
+      JWT_SECRET: ${JWT_SECRET:-secret_default}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      NOTIFICATION_SERVICE_URL: ${NOTIFICATION_SERVICE_URL:-http://localhost:3002}
+      DATABASE_URL: "postgresql://payment:payment@payment-postgres-db:5432/payment_db"
+    depends_on:
+      payment-postgres-db:
+        condition: service_healthy
+      payment-service:
+        condition: service_started
 
 volumes:
   payment_db_data:

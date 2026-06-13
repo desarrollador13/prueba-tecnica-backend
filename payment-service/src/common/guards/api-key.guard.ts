@@ -12,7 +12,6 @@ export class ApiKeyGuard implements CanActivate {
 
         const req = context.switchToHttp().getRequest<Request>();
         const apiKey = req.headers['x-api-key'] as string;
-
         if (!apiKey) throw new UnauthorizedException('API Key header is missing');
         const merchant = await this.prisma.merchant.findUnique({ where: { apiKey } });
         if (!merchant) throw new ForbiddenException('Invalid API key');
@@ -20,7 +19,7 @@ export class ApiKeyGuard implements CanActivate {
         if (merchant.status !== 'active') throw new ForbiddenException('Merchant account is inactive');
         req.merchant = merchant;
         return true;    
-
+        
     }
 
 }

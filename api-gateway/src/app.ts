@@ -1,4 +1,4 @@
-import express, {Application} from 'express';
+import express, {Application, json, urlencoded} from 'express';
 import cors from 'cors';
 import { ENV } from './config/environment';
 import proxyRouter from './routes/proxy.routes';
@@ -9,6 +9,8 @@ import { authMiddleware } from './middlewares/auth.middleware';
 
 const app: Application = express();
 
+// app.use(json({ limit: '10mb' }));
+// app.use(urlencoded({ extended: true, limit: '10mb' }));
 app.use(cors());
 app.use(loggingMiddleware);
 app.use(rateLimiterMiddleware);

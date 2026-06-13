@@ -7,6 +7,11 @@ const proxyRouter = Router();
 
 const routerPaymentService = async (req: Request, res: Response) => {
     const url = `${ENV.PAYMENT_SERVICE_URL}${req.originalUrl}`;
+    console.log(url);
+    console.log("body " + JSON.stringify(req.body));
+    console.log('method ' + req.method)
+    console.log("api keyv " + req.headers['x-api-key'])
+    console.log('data ' + req.headers['content-type'])
     try {
         const response = await axios({
             method: req.method,
@@ -15,8 +20,7 @@ const routerPaymentService = async (req: Request, res: Response) => {
             headers: {
                 'x-api-key': req.headers['x-api-key'],
                 'authorization': req.headers['authorization'],
-                'content-type': req.headers['content-type'] || PROXY_CONFIG.DEFAULT_CONTENT_TYPE,
-                ...req.headers,
+                'content-type': req.headers['content-type'] || PROXY_CONFIG.DEFAULT_CONTENT_TYPE
             },
             timeout: PROXY_CONFIG.TIMEOUT_MS,
         });
@@ -56,7 +60,7 @@ const routerPaymentService = async (req: Request, res: Response) => {
     }
 };
 
-proxyRouter.all('/api/v1/transactions/*', routerPaymentService);
-proxyRouter.all('/api/v1/settlements/*', routerPaymentService);
+proxyRouter.all('/transactions/*', routerPaymentService);
+proxyRouter.all('/settlements/*', routerPaymentService);
 
 export default proxyRouter;

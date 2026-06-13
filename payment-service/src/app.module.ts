@@ -6,17 +6,18 @@ import { SettlementsModule } from './modules/settlements/settlements.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { APP_GUARD } from '@nestjs/core';
 import { ApiKeyGuard } from './common/guards/api-key.guard';
+import { HealthModule } from './modules/health/health.module';
 
 
 @Module({
-  imports: [PrismaModule, SettlementsModule, TransactionsModule],
+  imports: [PrismaModule, SettlementsModule, TransactionsModule, HealthModule],
   controllers: [AppController],
   providers: [
     AppService,
     {
       provide: APP_GUARD,
-      useClass: ApiKeyGuard, // Se aplica a toda la aplicación
-    },
+      useClass: ApiKeyGuard,
+    }
   ],
 
 })

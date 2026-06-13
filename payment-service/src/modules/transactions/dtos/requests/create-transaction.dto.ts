@@ -7,7 +7,7 @@ export class CreateTransactionDto {
   merchantId: string;
 
   @IsNumber()
-  @Min(0.01, { message: 'El monto debe ser mayor a 0' })
+  @Min(0.01, { message: 'The amount must be greater than 0' })
   amount: number;
 
   @IsEnum(TransactionCurrency)

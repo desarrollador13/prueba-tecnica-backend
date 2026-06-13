@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../infra/prisma/prisma.service'; 
 import { CreateSettlementDto } from '../dtos/create-settlement.dto';
 import { randomUUID } from 'crypto';
@@ -12,17 +12,22 @@ export class SettlementsService {
 
   async generate(dto: CreateSettlementDto): Promise<SettlementResponseDto> {
     return await this.prisma.$transaction(async (sql) => {
+      const period_start = new Date(dto.period_start), period_end = new Date(dto.period_end);
+      period_start.setUTCHours(0, 0, 0, 0);
+      period_end.setUTCHours(23, 59, 59, 999);
       const transactions = await sql.transaction.findMany({
         where: {
           merchantId: dto.merchant_id,
           status: 'approved',
-          settlementTransaction: null,
-          createdAt: { gte: new Date(dto.period_start), lte: new Date(dto.period_end) },
+          settlementTransaction: {
+            is: null, 
+          },
+          createdAt: { gte: period_start, lte: period_end },
         },
       });
 
       if (transactions.length === 0) {
-        throw new NotFoundException('No hay transacciones elegibles para liquidar en este periodo.');
+        throw new NotFoundException('There are no transactions eligible for settlement during this period.');
       }
 
       const totalAmount = transactions.reduce((sum, transaction) => sum + Number(transaction.amount), 0);
@@ -39,30 +44,25 @@ export class SettlementsService {
       });
 
       await sql.settlementTransaction.createMany({
-        data: transactions.map((transaction) => ({
-            settlementId: settlement.id,
-            transactionId: transaction.id,
-        })),
+        data: transactions.map((transaction) => ({ settlementId: settlement.id, transactionId: transaction.id,})),
       });
-
-      // await sql.transaction.updateMany({
-      //   where: { id: { in: transactions.map((transaction) => transaction.id) } },
-      //   data: { settlementId: settlement.id },
-      // });
 
       return SettlementMapper.toDto(settlement);
     });
   }
 
   async getById(id: string): Promise<SettlementResponseDto> {
-    const settlement = await this.prisma.settlement.findUnique({
-      where: { id },
-      include: { transactions: true }, 
-    });
-    if (!settlement) {  
-      throw new NotFoundException(`Liquidación ${id} no encontrada`);
-    }
+    try {
+      const settlement = await this.prisma.settlement.findUnique({
+        where: { id }, include: { transactions: true }, 
+      });
+      if (!settlement) {  
+        throw new NotFoundException(`Settlement  ${id} not found`);
+      }
 
-    return SettlementMapper.toDto(settlement);
+      return SettlementMapper.toDto(settlement);
+    } catch (error) {
+      throw new InternalServerErrorException('internal server error occurred');
+    }
   }
 }

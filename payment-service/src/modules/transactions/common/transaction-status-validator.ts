@@ -12,7 +12,7 @@ export function validateStatusChange(current: TransactionStatus, next: Transacti
 
   if (invalidTransitions[current].includes(next)) {
     throw new UnprocessableEntityException(
-      `No es posible cambiar el estado de '${current}' a '${next}'`
+      `It is not possible to change the state of '${current}' a '${next}'`
     );
   }
 }   
